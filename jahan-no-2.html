@@ -1382,48 +1382,45 @@ const Entities = {
     }
     this.refill(dt);
   },
-  render(ctx,z,L,T,Rt,Bt,now){
-    if(z<0.4)return;
-    const detail=z>=0.9;
-    for(const e of this.list){
-      if(e.x<L-20||e.x>Rt+20||e.y<T-20||e.y>Bt+20)continue;
-      const fx=e.vx<0?-1:1, baby=e.age<1?0.72:1;
-      if(e.type==='deer'){
-        if(!detail){ctx.fillStyle='#a97c50';ctx.fillRect(e.x-2,e.y-1,4,2);continue;}
-        ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fillRect(e.x-3*baby,e.y+3,6*baby,1);
-        ctx.fillStyle='#8a6238';ctx.fillRect(e.x-2,e.y+1,1,2);ctx.fillRect(e.x+1,e.y+1,1,2);
-        ctx.fillStyle='#a97c50';ctx.fillRect(e.x-3*baby,e.y-1,6*baby,3);
-        ctx.fillStyle='#b98d5e';ctx.fillRect(e.x+fx*3*baby,e.y-2,2,2);
-        ctx.fillStyle='#5d432a';ctx.fillRect(e.x+fx*3*baby,e.y-3,1,1);ctx.fillRect(e.x+fx*4*baby,e.y-3,1,1);
-        ctx.fillStyle='#f0e6d8';ctx.fillRect(e.x-fx*3*baby,e.y-1,1,1);
-      }else if(e.type==='rabbit'){
-        if(!detail){ctx.fillStyle='#b9b3a8';ctx.fillRect(e.x-1,e.y-1,3,2);continue;}
-        ctx.fillStyle='#b9b3a8';ctx.fillRect(e.x-2,e.y-1,4,3);
-        ctx.fillStyle='#d8d2c6';ctx.fillRect(e.x+fx*2,e.y-1,1,2);
-        ctx.fillStyle='#9a948a';ctx.fillRect(e.x+fx*2,e.y-2,1,1);
-      }else if(e.type==='wolf'){
-        if(!detail){ctx.fillStyle='#6c6f77';ctx.fillRect(e.x-2,e.y-1,5,2);continue;}
-        ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(e.x-3,e.y+3,7,1);
-        ctx.fillStyle='#5d616a';ctx.fillRect(e.x-3,e.y-1,7,3);
-        ctx.fillStyle='#4a4e56';ctx.fillRect(e.x-3,e.y+1,1,2);ctx.fillRect(e.x+2,e.y+1,1,2);
-        ctx.fillStyle='#787d86';ctx.fillRect(e.x+fx*3,e.y-2,2,2);
-        ctx.fillStyle='#ffd35a';ctx.fillRect(e.x+fx*4,e.y-2,1,1);
-        ctx.fillStyle='#4a4e56';ctx.fillRect(e.x-fx*4,e.y-2,2,1);
-      }else if(e.type==='boar'){
-        if(!detail){ctx.fillStyle='#4f4136';ctx.fillRect(e.x-2,e.y-1,5,2);continue;}
-        ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(e.x-3,e.y+3,7,1);
-        ctx.fillStyle='#4f4136';ctx.fillRect(e.x-3,e.y-1,7,4);
-        ctx.fillStyle='#3b3129';ctx.fillRect(e.x+fx*3,e.y,3,2);
-        ctx.fillStyle='#e8e2d6';ctx.fillRect(e.x+fx*5,e.y,1,1);
-      }else{
-        if(z<0.55)continue;
-        const wig=Math.sin(now*0.008+e.phase);
-        ctx.fillStyle='#4d7f9e';ctx.fillRect(e.x-2,e.y,4,2);
-        ctx.fillStyle='#3a6580';ctx.fillRect(e.x-fx*3,e.y+(wig>0?0:1),1,1);
-        ctx.fillStyle='#7fb2cf';ctx.fillRect(e.x+fx*1,e.y,1,1);
-      }
+  /* رسمِ تک‌جانور — از لایهٔ عمق‌دار (renderTallSorted) هم صدا زده می‌شود */
+  drawOne(ctx,e,z,now){
+    const fx=e.vx<0?-1:1, baby=e.age<1?0.72:1, detail=z>=0.9;
+    if(e.type==='deer'){
+      if(!detail){ctx.fillStyle='#a97c50';ctx.fillRect(e.x-2,e.y-1,4,2);return;}
+      ctx.fillStyle='rgba(0,0,0,0.18)';ctx.fillRect(e.x-3*baby,e.y+3,6*baby,1);
+      ctx.fillStyle='#8a6238';ctx.fillRect(e.x-2,e.y+1,1,2);ctx.fillRect(e.x+1,e.y+1,1,2);
+      ctx.fillStyle='#a97c50';ctx.fillRect(e.x-3*baby,e.y-1,6*baby,3);
+      ctx.fillStyle='#b98d5e';ctx.fillRect(e.x+fx*3*baby,e.y-2,2,2);
+      ctx.fillStyle='#5d432a';ctx.fillRect(e.x+fx*3*baby,e.y-3,1,1);ctx.fillRect(e.x+fx*4*baby,e.y-3,1,1);
+      ctx.fillStyle='#f0e6d8';ctx.fillRect(e.x-fx*3*baby,e.y-1,1,1);
+    }else if(e.type==='rabbit'){
+      if(!detail){ctx.fillStyle='#b9b3a8';ctx.fillRect(e.x-1,e.y-1,3,2);return;}
+      ctx.fillStyle='#b9b3a8';ctx.fillRect(e.x-2,e.y-1,4,3);
+      ctx.fillStyle='#d8d2c6';ctx.fillRect(e.x+fx*2,e.y-1,1,2);
+      ctx.fillStyle='#9a948a';ctx.fillRect(e.x+fx*2,e.y-2,1,1);
+    }else if(e.type==='wolf'){
+      if(!detail){ctx.fillStyle='#6c6f77';ctx.fillRect(e.x-2,e.y-1,5,2);return;}
+      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(e.x-3,e.y+3,7,1);
+      ctx.fillStyle='#5d616a';ctx.fillRect(e.x-3,e.y-1,7,3);
+      ctx.fillStyle='#4a4e56';ctx.fillRect(e.x-3,e.y+1,1,2);ctx.fillRect(e.x+2,e.y+1,1,2);
+      ctx.fillStyle='#787d86';ctx.fillRect(e.x+fx*3,e.y-2,2,2);
+      ctx.fillStyle='#ffd35a';ctx.fillRect(e.x+fx*4,e.y-2,1,1);
+      ctx.fillStyle='#4a4e56';ctx.fillRect(e.x-fx*4,e.y-2,2,1);
+    }else if(e.type==='boar'){
+      if(!detail){ctx.fillStyle='#4f4136';ctx.fillRect(e.x-2,e.y-1,5,2);return;}
+      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(e.x-3,e.y+3,7,1);
+      ctx.fillStyle='#4f4136';ctx.fillRect(e.x-3,e.y-1,7,4);
+      ctx.fillStyle='#3b3129';ctx.fillRect(e.x+fx*3,e.y,3,2);
+      ctx.fillStyle='#e8e2d6';ctx.fillRect(e.x+fx*5,e.y,1,1);
+    }else{
+      if(z<0.55)return;
+      const wig=Math.sin(now*0.008+e.phase);
+      ctx.fillStyle='#4d7f9e';ctx.fillRect(e.x-2,e.y,4,2);
+      ctx.fillStyle='#3a6580';ctx.fillRect(e.x-fx*3,e.y+(wig>0?0:1),1,1);
+      ctx.fillStyle='#7fb2cf';ctx.fillRect(e.x+fx*1,e.y,1,1);
     }
-  }
+  },
+  render(ctx,z,L,T,Rt,Bt,now){ /* دیگر مستقیم رسم نمی‌شود — جانورها در لایهٔ عمق‌دار (renderTallSorted) مرتب و رسم می‌شوند */ }
 };
 
 /* ================================================================
@@ -1464,6 +1461,8 @@ const ModernHumanTexture = {
 /* ================================================================
    HUMANS — روستاییان با شغل، مهارت، سن، سلامت و خانواده
    ================================================================ */
+const JOBCOL=['#77694f','#8a5a3a','#6d7683','#3f6f8f','#4f7a4a','#b39a4e','#a3673c','#7a5f8f','#b0a3d6','#c98fa0'];
+const CARRYCOL=['','#7aa04e','#9a99a0','#a56a4a','#4fae8f','#e8c352','#d84a52','#7fb2cf','#8f8f6a','#c9705f','#d9c06a','#9fb6c4','#b9c7d6'];
 const Humans = {
   list:[],modern:[],
   NAMES_M:['آرش','گیو','کیان','آبان','رامین','بهرام','فرهاد','سهراب','اردشیر','پویا','کاوه','بیژن'],
@@ -1969,47 +1968,26 @@ const Humans = {
       const actual=Math.hypot(h.vx,h.vy); h.phase+=dt*(actual>.8?5.2:.8); h.walk=Math.min(1,actual/Math.max(h.speed,1));
     }
   },
-  renderModern(ctx,z,L,T,Rt,Bt){
-    if(z<0.45)return;
-    for(const h of this.modern){
-      if(h.x<L-30||h.x>Rt+30||h.y<T-40||h.y>Bt+30)continue;
-      ModernHumanTexture.draw(ctx,h.x,h.y,0.24,h.phase,h.vx<-.2?-1:1,h.walk,h.style);
-      if(h.speechT>0&&z>.7){
-        ctx.save();ctx.font='10px sans-serif';ctx.textAlign='center';
-        const tx=h.x,ty=h.y-16;const tw=ctx.measureText(h.speech).width+8;
-        ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(tx-tw/2,ty-10,tw,13);
-        ctx.fillStyle='#26313b';ctx.fillText(h.speech,tx,ty);ctx.restore();
-      }
+  /* رسمِ تک‌انسان — از لایهٔ عمق‌دار (renderTallSorted) هم صدا زده می‌شود */
+  drawOne(ctx,h,z){
+    if(z<0.5){ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-1,h.y-1,2,2);return;}
+    if(h.state===H.SLEEP){
+      ctx.fillStyle='#7a5a3a';ctx.fillRect(h.x-3,h.y-1,6,3);
+      ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-4,h.y-1,2,2);
+      if(((Game.time*2)|0)%3===0){ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillRect(h.x+3,h.y-4,1,1);}
+      return;
     }
+    const sc=h.age<14?0.72:1;
+    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(h.x-2*sc,h.y+3,4*sc,1);
+    ctx.fillStyle=JOBCOL[h.job]||'#77694f';
+    ctx.fillRect(h.x-2*sc,h.y-1,4*sc,4*sc);
+    ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-1*sc,h.y-4*sc,3*sc,3*sc);
+    ctx.fillStyle=h.gender==='ز'?'#5d3a2c':'#3a2c1c';ctx.fillRect(h.x-1*sc,h.y-5*sc,3*sc,1);
+    if(h.carry>0){ctx.fillStyle=CARRYCOL[h.ctype]||'#fff';ctx.fillRect(h.x-1,h.y-7,2,2);}
+    if(h.hurt>0){ctx.fillStyle='rgba(220,60,60,'+(0.5*h.hurt).toFixed(2)+')';ctx.fillRect(h.x-3,h.y-6,6,8);}
+    if(z>1.6){ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText(JOB_ICON[h.job]||'',h.x,h.y-7);}
   },
-  render(ctx,z,L,T,Rt,Bt){
-    if(z<0.34)return;
-    const dot=z<0.5;
-    const showJob=z>1.6; // نشانِ شغل در زوم نزدیک — فونت فقط یک‌بار تنظیم می‌شود
-    const JOBCOL=['#77694f','#8a5a3a','#6d7683','#3f6f8f','#4f7a4a','#b39a4e','#a3673c','#7a5f8f','#b0a3d6','#c98fa0'];
-    if(showJob){ctx.save();ctx.font='4px sans-serif';ctx.textAlign='center';}
-    for(const h of this.list){
-      if(h.x<L-20||h.x>Rt+20||h.y<T-20||h.y>Bt+20)continue;
-      if(dot){ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-1,h.y-1,2,2);continue;}
-      if(h.state===H.SLEEP){
-        ctx.fillStyle='#7a5a3a';ctx.fillRect(h.x-3,h.y-1,6,3);
-        ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-4,h.y-1,2,2);
-        if(((Game.time*2)|0)%3===0){ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillRect(h.x+3,h.y-4,1,1);}
-        continue;
-      }
-      const sc=h.age<14?0.72:1;
-      ctx.fillStyle='rgba(0,0,0,0.2)';ctx.fillRect(h.x-2*sc,h.y+3,4*sc,1);
-      ctx.fillStyle=JOBCOL[h.job]||'#77694f';
-      ctx.fillRect(h.x-2*sc,h.y-1,4*sc,4*sc);
-      ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-1*sc,h.y-4*sc,3*sc,3*sc);
-      ctx.fillStyle=h.gender==='ز'?'#5d3a2c':'#3a2c1c';ctx.fillRect(h.x-1*sc,h.y-5*sc,3*sc,1);
-      if(h.carry>0){const cc=['','#7aa04e','#9a99a0','#a56a4a','#4fae8f','#e8c352','#d84a52','#7fb2cf','#8f8f6a','#c9705f','#d9c06a','#9fb6c4','#b9c7d6'];
-        ctx.fillStyle=cc[h.ctype]||'#fff';ctx.fillRect(h.x-1,h.y-7,2,2);}
-      if(h.hurt>0){ctx.fillStyle='rgba(220,60,60,'+(0.5*h.hurt).toFixed(2)+')';ctx.fillRect(h.x-3,h.y-6,6,8);}
-      if(showJob){ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText(JOB_ICON[h.job]||'',h.x,h.y-7);}
-    }
-    if(showJob)ctx.restore();
-  }
+  render(ctx,z,L,T,Rt,Bt){ /* دیگر مستقیم رسم نمی‌شود — انسان‌ها در لایهٔ عمق‌دار (renderTallSorted) مرتب و رسم می‌شوند */ }
 };
 
 /* ================================================================
@@ -2119,6 +2097,7 @@ const Powers = {
 /* ================================================================
    RENDERER — چانک‌ها، اسپرایت‌ها، آتش، آب‌وهوا، جلوه‌ها
    ================================================================ */
+const _YSORT=(a,b)=>a.y-b.y; // مرتب‌سازیِ عمق برای لایهٔ نقاش
 const Renderer = {
   cv:null,ctx:null,dpr:1,cssW:0,cssH:0,
   chunks:null,cache:null,dirty:null,dirtyList:null,sharedID:null,sharedU32:null,
@@ -2127,6 +2106,7 @@ const Renderer = {
   // اسپرایت‌ها و اورلی‌های پیش‌رندرشده (خروجیِ پیکسلی یکسان، هزینهٔ هر فریم صفر)
   sprTreeShadow:null,sprFireGlow:null,sprVillageGlow:null,
   sprBerry:null,
+  _ents:[],_pool:[],_trees:[],_bubs:[],
   ovlNight:null,ovlFog:null,ovlVig:null,
 
   init(){
@@ -2279,12 +2259,8 @@ const Renderer = {
       const wx=x0+tx,wy=y0+ty,i=wy*CFG.MAP+wx;
       const px=tx*T,py=ty*T,h=tileHash(wx,wy,(World.seed>>>3)&255);
       const rt=World.res[i],st=World.resState[i];
-      if(rt && rt!==R.BERRY && !(rt===R.WOOD && World.temp[i]>=0.4)) drawResSprite(ctx,rt,st,px,py,h,World.temp[i]);
-      if(World.flags[i]&FLAG_BLD){
-        const b=Village.buildings.find(bb=>bb.i===i);
-        drawBuilding(ctx,b?b.type:'house',px,py,h,1);
-      }
-      if(i===Village.center&&Village.center>=0)drawWell(ctx,px,py);
+      // فقط منابعِ کوتاهِ زمینی پخته می‌شود؛ درخت‌های کامل، ساختمان‌ها و چاه در لایهٔ عمق‌دار رندر می‌شوند
+      if(rt && rt!==R.BERRY && !(rt===R.WOOD && st>=1)) drawResSprite(ctx,rt,st,px,py,h,World.temp[i]);
     }
     return entry;
   },
@@ -2306,39 +2282,110 @@ const Renderer = {
     }
   },
 
-  renderBroadleafTrees(ctx,L,Tp,Rt,Bt){
-    if(!(BROADLEAF_TREE.complete && BROADLEAF_TREE.naturalWidth)) return;
+  renderTreeShadows(ctx,L,Tp,Rt,Bt){
+    // گذرِ سایه‌ها روی زمین + جمع‌آوریِ درختانِ مرئی به‌ترتیبِ سطر (برای لایهٔ عمق‌دار)
+    const trees=this._trees;trees.length=0;
     const x0=clamp(Math.floor(L/16)-2,0,255), x1=clamp(Math.floor(Rt/16)+2,0,255);
     const y0=clamp(Math.floor(Tp/16)-2,0,255), y1=clamp(Math.floor(Bt/16)+2,0,255);
-    const ar=BROADLEAF_TREE.naturalWidth/BROADLEAF_TREE.naturalHeight;
-    const dh=18.75, dw=dh*ar; // ۲۵٪ کوچک‌تر (۱۸٫۷۵ به‌جای ۲۵)
-    const sway=Math.sin(Game.time*1.4)*Weather.windSpd*1.5;
-    // گذر ۱: سایه‌ها از اسپرایتِ پیش‌رندرشده (نرم‌سازی روشن، چون سایه گرادیانِ نرم است)
     const sh=this.sprTreeShadow;
-    if(sh){
-      ctx.imageSmoothingEnabled=true;
+    if(!sh){
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
         const i=y*256+x;
-        if(World.res[i]!==R.WOOD || World.resState[i]<1 || World.temp[i]<0.4) continue;
-        ctx.drawImage(sh,x*16+8-12.75,y*16+15.5-3.75,25.5,7.5); // سایه هم ۲۵٪ کوچک‌تر
+        if(World.res[i]!==R.WOOD || World.resState[i]<1) continue;
+        trees.push(i);
       }
+      return;
     }
-    // گذر ۲: تاجِ درخت‌ها (پیکسلی، دقیقاً مثل قبل)
-    ctx.imageSmoothingEnabled=false;
-    const snowy=Season.snow>0.25;
+    ctx.imageSmoothingEnabled=true; // سایه گرادیانِ نرم است
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
       const i=y*256+x;
-      if(World.res[i]!==R.WOOD || World.resState[i]<1 || World.temp[i]<0.4) continue;
-      const px=x*16,py=y*16;
-      const off=sway*(0.5+tileHash(x,y,31)*0.5);
-      ctx.drawImage(BROADLEAF_TREE,px+8-dw/2+off,py+15-dh,dw,dh);
-      // برفِ زمستانی روی تاج
-      if(snowy&&World.temp[i]<0.72){
-        ctx.globalAlpha=clamp01(Season.snow*0.55);
-        ctx.fillStyle='#eef4fb';
-        ctx.fillRect(px+8-dw/2+off+dw*0.22,py+15-dh+dh*0.16,dw*0.55,dh*0.10);
-        ctx.globalAlpha=1;
+      if(World.res[i]!==R.WOOD || World.resState[i]<1) continue;
+      trees.push(i);
+      if(World.temp[i]>=0.4) ctx.drawImage(sh,x*16+8-12.75,y*16+15.5-3.75,25.5,7.5); // سایهٔ پهن‌برگ؛ کاج سایهٔ خودش را داخلِ اسپرایت دارد
+    }
+    ctx.imageSmoothingEnabled=false;
+  },
+  /* لایهٔ عمق‌دار: درخت‌ها، ساختمان‌ها، کارگاه‌های ساخت، چاه، انسان‌ها و جانورها
+     با الگوریتمِ نقاش (painter's algorithm) بر اساسِ y مرتب و درهم رسم می‌شوند —
+     دیگر هیچ‌کس روی درخت یا خانه راه نمی‌رود و کسی که جلوی درخت است پشتش پنهان نمی‌شود */
+  renderTallSorted(ctx,z,L,Tp,Rt,Bt,now){
+    const ents=this._ents;ents.length=0;
+    const pool=this._pool;let n=0;
+    const add=(y,k,e)=>{let o=pool[n];if(o===undefined){o={y:0,k:0,e:null};pool[n]=o;}
+      n++;o.y=y;o.k=k;o.e=e;ents.push(o);};
+    if(z>=0.34)for(const h of Humans.list){
+      if(h.x<L-20||h.x>Rt+20||h.y<Tp-20||h.y>Bt+20)continue;add(h.y,0,h);}
+    if(z>=0.45)for(const h of Humans.modern){
+      if(h.x<L-30||h.x>Rt+30||h.y<Tp-40||h.y>Bt+30)continue;add(h.y,1,h);}
+    if(z>=0.4)for(const e of Entities.list){
+      if(e.x<L-20||e.x>Rt+20||e.y<Tp-20||e.y>Bt+20)continue;add(e.y+4,2,e);}
+    for(const b of Village.buildings){
+      if(b.type==='farm')continue; // مزرعه سطحِ زمین است — در renderDynamicTiles رسم می‌شود
+      const bx=TX(b.i)*16,by=TY(b.i)*16;
+      if(bx<L-24||bx>Rt+8||by<Tp-24||by>Bt+8)continue;add(by+16,3,b);}
+    for(const s of Village.sites){
+      const sx=TX(s.i)*16,sy=TY(s.i)*16;
+      if(sx<L-24||sx>Rt+8||sy<Tp-24||sy>Bt+8)continue;add(sy+16,4,s);}
+    if(Village.center>=0){
+      const wx=TX(Village.center)*16,wy=TY(Village.center)*16;
+      if(wx>=L-24&&wx<Rt+8&&wy>=Tp-24&&wy<Bt+8)add(wy+16,5,Village.center);}
+    ents.sort(_YSORT);
+    const trees=this._trees,bubs=this._bubs;bubs.length=0;
+    const hasImg=BROADLEAF_TREE.complete&&BROADLEAF_TREE.naturalWidth;
+    const dh=18.75,dw=hasImg?dh*(BROADLEAF_TREE.naturalWidth/BROADLEAF_TREE.naturalHeight):0;
+    const sway=Math.sin(Game.time*1.4)*Weather.windSpd*1.5;
+    const snowy=Season.snow>0.25;
+    const showJob=z>1.6;
+    ctx.imageSmoothingEnabled=false;
+    if(showJob){ctx.save();ctx.font='4px sans-serif';ctx.textAlign='center';}
+    let a=0,b=0;const nT=trees.length,nE=ents.length;
+    while(a<nT){
+      if(b<nE&&ents[b].y<((trees[a]>>8)*16+15))this._drawTallEnt(ctx,ents[b++],z,now,bubs);
+      else this._drawTreeTile(ctx,trees[a++],dw,sway,snowy);
+    }
+    while(b<nE)this._drawTallEnt(ctx,ents[b++],z,now,bubs);
+    if(showJob)ctx.restore();
+    // حباب‌های گفتار روی همهٔ اجسام (تا تاجِ درخت رویشان نیفتد)
+    if(bubs.length){
+      ctx.save();ctx.font='10px sans-serif';ctx.textAlign='center';
+      for(const h of bubs){
+        const tx=h.x,ty=h.y-16,tw=ctx.measureText(h.speech).width+8;
+        ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(tx-tw/2,ty-10,tw,13);
+        ctx.fillStyle='#26313b';ctx.fillText(h.speech,tx,ty);
       }
+      ctx.restore();
+    }
+  },
+  _drawTreeTile(ctx,i,dw,sway,snowy){
+    const tx=i&255,ty=i>>8,px=tx*16,py=ty*16,temp=World.temp[i];
+    if(temp<0.4){ // کاج — همان اسپرایتی که در تکه پخته می‌شد
+      drawResSprite(ctx,R.WOOD,1,px,py,tileHash(tx,ty,(World.seed>>>3)&255),temp);return;}
+    if(!dw)return;
+    const dh=18.75;
+    const off=sway*(0.5+tileHash(tx,ty,31)*0.5);
+    ctx.drawImage(BROADLEAF_TREE,px+8-dw/2+off,py+15-dh,dw,dh);
+    if(snowy&&temp<0.72){ // برفِ زمستانی روی تاج
+      ctx.globalAlpha=clamp01(Season.snow*0.55);
+      ctx.fillStyle='#eef4fb';
+      ctx.fillRect(px+8-dw/2+off+dw*0.22,py+15-dh+dh*0.16,dw*0.55,dh*0.10);
+      ctx.globalAlpha=1;
+    }
+  },
+  _drawTallEnt(ctx,o,z,now,bubs){
+    const e=o.e;
+    switch(o.k){
+      case 0:Humans.drawOne(ctx,e,z);break;
+      case 1:
+        ModernHumanTexture.draw(ctx,e.x,e.y,0.24,e.phase,e.vx<-.2?-1:1,e.walk,e.style);
+        if(e.speechT>0&&z>.7)bubs.push(e);
+        break;
+      case 2:Entities.drawOne(ctx,e,z,now);break;
+      case 3:drawBuilding(ctx,e.type,TX(e.i)*16,TY(e.i)*16,tileHash(TX(e.i),TY(e.i),(World.seed>>>3)&255),1);break;
+      case 4:{const x=TX(e.i)*16,y=TY(e.i)*16;
+        drawBuilding(ctx,e.type,x,y,tileHash(TX(e.i),TY(e.i),3),e.prog);
+        ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(x+2,y-3,12,2);
+        ctx.fillStyle='#7ed49a';ctx.fillRect(x+2,y-3,12*clamp01(e.prog),2);break;}
+      case 5:drawWell(ctx,TX(e)*16,TY(e)*16);break;
     }
   },
   renderWildBerryBushes(ctx,L,Tp,Rt,Bt){
@@ -2374,26 +2421,19 @@ const Renderer = {
       ctx.fillRect(x,y,16,16);
       if(Math.random()<0.06)this.addParticle(x+8+rnd(-4,4),y+6,'#6a6a6a');
     }
-    // کارگاه‌های ساخت
-    for(const s of Village.sites){
-      const x=TX(s.i)*16,y=TY(s.i)*16;
-      if(x<L-16||x>Rt+16||y<Tp-16||y>Bt+16)continue;
-      drawBuilding(ctx,s.type,x,y,tileHash(TX(s.i),TY(s.i),3),s.prog);
-      ctx.fillStyle='rgba(0,0,0,.45)';ctx.fillRect(x+2,y-3,12,2);
-      ctx.fillStyle='#7ed49a';ctx.fillRect(x+2,y-3,12*clamp01(s.prog),2);
-    }
-    // گورها
+    // گورها — سطحِ زمین
     for(const g of Village.graves){
       const x=TX(g.i)*16,y=TY(g.i)*16;
       if(x<L-16||x>Rt+16||y<Tp-16||y>Bt+16)continue;
       ctx.fillStyle='#8d8577';ctx.fillRect(x+7,y+8,2,5);ctx.fillRect(x+5,y+9,6,2);
       ctx.fillStyle='rgba(0,0,0,.2)';ctx.fillRect(x+5,y+13,7,1);
     }
-    // مزرعه‌ها: نوارهای کشت
+    // مزرعه‌ها: سطحِ زمین — باغ‌کِ کشت زیرِ پاهای انسان‌ها
     for(const b of Village.buildings){
       if(b.type!=='farm')continue;
       const x=TX(b.i)*16,y=TY(b.i)*16;
       if(x<L-16||x>Rt+16||y<Tp-16||y>Bt+16)continue;
+      drawBuilding(ctx,'farm',x,y,tileHash(TX(b.i),TY(b.i),3),1);
       const grow=clamp01(b.acc/6)*Season.growth;
       ctx.fillStyle='#6b5330';ctx.fillRect(x+1,y+1,14,14);
       ctx.fillStyle=Season.idx===3?'#8a9a86':'#8fbf5a';
@@ -2478,11 +2518,7 @@ const Renderer = {
       ctx.drawImage(this.getChunk(cy*C+cx).canvas,cx*CS,cy*CS);
 
     this.renderDynamicTiles(ctx,L,Tp,Rt,Bt,now);
-    Humans.render(ctx,z,L,Tp,Rt,Bt);
-    Humans.renderModern(ctx,z,L,Tp,Rt,Bt);
-    this.renderBroadleafTrees(ctx,L,Tp,Rt,Bt);
-    this.renderWildBerryBushes(ctx,L,Tp,Rt,Bt);
-    // برقِ آب
+    // برقِ آب — جزئیاتِ سطحِ زمین، زیرِ همهٔ موجودها
     if(z>=0.75){
       const t0=clamp(Math.floor(Tp/16),0,255),t1=clamp(Math.floor(Bt/16),0,255);
       const s0=clamp(Math.floor(L/16),0,255),s1=clamp(Math.floor(Rt/16),0,255);
@@ -2494,7 +2530,9 @@ const Renderer = {
         if(s>0.955)ctx.fillRect(tx*16+3+(hh*9|0),ty*16+3+((hh*7*9)|0)%9,1,1);
       }
     }
-    Entities.render(ctx,z,L,Tp,Rt,Bt,now);
+    this.renderWildBerryBushes(ctx,L,Tp,Rt,Bt);   // بوته‌های کوتاه — لایهٔ زمین
+    this.renderTreeShadows(ctx,L,Tp,Rt,Bt);       // سایه‌ها + جمع‌آوریِ درختان
+    this.renderTallSorted(ctx,z,L,Tp,Rt,Bt,now);  // عمق‌نمایی: درخت/خانه/انسان/جانور
     if(Village.center>=0&&z>0.5)drawFire(ctx,Village.center,now);
     // ذرات
     ctx.globalAlpha=1;
