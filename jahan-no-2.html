@@ -23,6 +23,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
   background:rgba(13,17,27,.76);border:1px solid rgba(255,255,255,.09);
   border-radius:12px;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
   box-shadow:0 4px 18px rgba(0,0,0,.38);font-size:12px;line-height:1.85;
+  contain:layout style;
 }
 .pHead{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;font-weight:700;font-size:12.5px}
 .pHead button{opacity:.7;font-size:13px;padding:2px 6px}
@@ -33,8 +34,8 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
 #topbar{position:absolute;top:calc(8px + env(safe-area-inset-top));right:10px;left:10px;
   display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-start;pointer-events:none}
 #topbar .chip{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;
-  background:rgba(13,17,27,.78);border:1px solid rgba(255,255,255,.09);
-  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+  background:rgba(13,17,27,.88);border:1px solid rgba(255,255,255,.09);
+  contain:layout style;
   font-size:12px;font-weight:700;white-space:nowrap;pointer-events:auto}
 #faithChip{gap:7px}
 #faithBar{display:inline-block;width:56px;height:6px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
@@ -86,8 +87,8 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
   display:flex;flex-direction:column;gap:5px;max-height:calc(100vh - 190px);overflow:auto;padding:2px}
 #powers::-webkit-scrollbar{width:0}
 .pw{position:relative;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
-  background:rgba(13,17,27,.78);border:1px solid rgba(255,255,255,.1);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s,background .2s,border-color .2s}
+  background:rgba(13,17,27,.88);border:1px solid rgba(255,255,255,.1);
+  contain:layout style;transition:transform .12s,background .2s,border-color .2s}
 .pw:active{transform:scale(.9)}
 .pw .pwIcon{font-size:19px;line-height:1}
 .pw .pwCost{position:absolute;bottom:-1px;left:3px;font-size:9px;color:#ffd77a;font-weight:700}
@@ -98,8 +99,8 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
 #ctrls{position:absolute;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));
   display:flex;gap:6px;flex-wrap:wrap;width:100px}
 #ctrls button{width:42px;height:42px;border-radius:12px;font-size:17px;display:grid;place-items:center;
-  background:rgba(13,17,27,.78);border:1px solid rgba(255,255,255,.1);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .12s}
+  background:rgba(13,17,27,.88);border:1px solid rgba(255,255,255,.1);
+  contain:layout style;transition:transform .12s}
 #ctrls button:active{transform:scale(.9)}
 
 /* ---- نقشهٔ کوچک ---- */
@@ -124,7 +125,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
 
 #hint{position:absolute;bottom:calc(14px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
   padding:7px 14px;border-radius:99px;font-size:11.5px;color:#dfe8f5;white-space:nowrap;max-width:60vw;overflow:hidden;text-overflow:ellipsis;
-  background:rgba(13,17,27,.72);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(8px);
+  background:rgba(13,17,27,.85);border:1px solid rgba(255,255,255,.08);
   transition:opacity 1s;pointer-events:none}
 #toast{position:absolute;top:calc(96px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
   padding:6px 16px;border-radius:99px;font-size:12px;background:rgba(20,26,40,.92);border:1px solid rgba(255,255,255,.12);
@@ -312,7 +313,8 @@ const clamp=(v,a,b)=>v<a?a:v>b?b:v, clamp01=v=>v<0?0:v>1?1:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const smooth=(a,b,v)=>{v=clamp01((v-a)/(b-a));return v*v*(3-2*v);};
 const FA='۰۱۲۳۴۵۶۷۸۹';
-const faNum=n=>String(n).replace(/\d/g,d=>FA[d]);
+// مسیرِ سریعِ اعداد فارسی: بدون regex و بدون ساخت closure در هر فراخوانی
+const faNum=n=>{const s=String(n);let o='';for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);o+=c>=48&&c<=57?FA[c-48]:s[i];}return o;};
 const TX=i=>i&255, TY=i=>i>>8;                 // مختصات کاشی از اندیس
 const IDX=(x,y)=>(y<<8)+x;
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -1983,7 +1985,9 @@ const Humans = {
   render(ctx,z,L,T,Rt,Bt){
     if(z<0.34)return;
     const dot=z<0.5;
+    const showJob=z>1.6; // نشانِ شغل در زوم نزدیک — فونت فقط یک‌بار تنظیم می‌شود
     const JOBCOL=['#77694f','#8a5a3a','#6d7683','#3f6f8f','#4f7a4a','#b39a4e','#a3673c','#7a5f8f','#b0a3d6','#c98fa0'];
+    if(showJob){ctx.save();ctx.font='4px sans-serif';ctx.textAlign='center';}
     for(const h of this.list){
       if(h.x<L-20||h.x>Rt+20||h.y<T-20||h.y>Bt+20)continue;
       if(dot){ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-1,h.y-1,2,2);continue;}
@@ -2002,11 +2006,9 @@ const Humans = {
       if(h.carry>0){const cc=['','#7aa04e','#9a99a0','#a56a4a','#4fae8f','#e8c352','#d84a52','#7fb2cf','#8f8f6a','#c9705f','#d9c06a','#9fb6c4','#b9c7d6'];
         ctx.fillStyle=cc[h.ctype]||'#fff';ctx.fillRect(h.x-1,h.y-7,2,2);}
       if(h.hurt>0){ctx.fillStyle='rgba(220,60,60,'+(0.5*h.hurt).toFixed(2)+')';ctx.fillRect(h.x-3,h.y-6,6,8);}
-      if(z>1.6){ // نشانِ شغل در زوم نزدیک
-        ctx.save();ctx.font='4px sans-serif';ctx.textAlign='center';
-        ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText(JOB_ICON[h.job]||'',h.x,h.y-7);ctx.restore();
-      }
+      if(showJob){ctx.fillStyle='rgba(255,255,255,.75)';ctx.fillText(JOB_ICON[h.job]||'',h.x,h.y-7);}
     }
+    if(showJob)ctx.restore();
   }
 };
 
@@ -2122,6 +2124,9 @@ const Renderer = {
   chunks:null,cache:null,dirty:null,dirtyList:null,sharedID:null,sharedU32:null,
   particles:[],pulses:[],bolts:[],meteors:[],shakeT:0,shakeA:0,
   rainDrops:[],snowFlakes:[],
+  // اسپرایت‌ها و اورلی‌های پیش‌رندرشده (خروجیِ پیکسلی یکسان، هزینهٔ هر فریم صفر)
+  sprTreeShadow:null,sprFireGlow:null,sprVillageGlow:null,
+  ovlNight:null,ovlFog:null,ovlVig:null,
 
   init(){
     this.cv=document.getElementById('game');
@@ -2134,6 +2139,7 @@ const Renderer = {
     this.sharedU32=new Uint32Array(this.sharedID.data.buffer);
     for(let i=0;i<260;i++)this.rainDrops.push({x:Math.random(),y:Math.random(),s:0.6+Math.random()*0.8});
     for(let i=0;i<190;i++)this.snowFlakes.push({x:Math.random(),y:Math.random(),s:0.4+Math.random()*0.9,p:Math.random()*7});
+    this.bakeSprites();
     this.resize();
     addEventListener('resize',()=>this.resize());
   },
@@ -2144,6 +2150,73 @@ const Renderer = {
     this.cv.width=Math.round(this.cssW*this.dpr);
     this.cv.height=Math.round(this.cssH*this.dpr);
     this.ctx.imageSmoothingEnabled=false;
+    this.bakeOverlays();
+  },
+  // پیش‌رندرِ یک‌بارهٔ سایه‌ها و هاله‌ها (مستقل از ابعاد صفحه)
+  bakeSprites(){
+    // سایهٔ بیضویِ درختِ پهن‌برگ: همان گرادیان و همان تبدیلِ نسخهٔ اصلی، با ۳ برابر وضوح
+    {
+      const c=document.createElement('canvas');c.width=102;c.height=30;
+      const g=c.getContext('2d');
+      g.translate(51,15);g.scale(1.65*3,0.46*3);
+      const gr=g.createRadialGradient(0,0,0,0,0,10);
+      gr.addColorStop(0,'rgba(0,0,0,0.46)');gr.addColorStop(0.42,'rgba(0,0,0,0.30)');
+      gr.addColorStop(0.72,'rgba(0,0,0,0.14)');gr.addColorStop(0.9,'rgba(0,0,0,0.05)');
+      gr.addColorStop(1,'rgba(0,0,0,0)');
+      g.fillStyle=gr;g.beginPath();g.arc(0,0,10,0,Math.PI*2);g.fill();
+      this.sprTreeShadow=c;
+    }
+    // هالهٔ آتش (شعاع ۴۴) — در dark=1 پخته می‌شود و هر فریم با globalAlpha ضرب می‌شود
+    {
+      const c=document.createElement('canvas');c.width=88;c.height=88;
+      const g=c.getContext('2d');
+      const gr=g.createRadialGradient(44,44,2,44,44,44);
+      gr.addColorStop(0,'rgba(255,140,50,0.30)');gr.addColorStop(1,'rgba(255,140,50,0)');
+      g.fillStyle=gr;g.fillRect(0,0,88,88);
+      this.sprFireGlow=c;
+    }
+    // هالهٔ روستا (شعاع ۱۱۰)
+    {
+      const c=document.createElement('canvas');c.width=220;c.height=220;
+      const g=c.getContext('2d');
+      const gr=g.createRadialGradient(110,110,4,110,110,110);
+      gr.addColorStop(0,'rgba(255,180,90,0.30)');gr.addColorStop(1,'rgba(255,180,90,0)');
+      g.fillStyle=gr;g.fillRect(0,0,220,220);
+      this.sprVillageGlow=c;
+    }
+  },
+  // پیش‌رندرِ اورلی‌های تمام‌صفحه (وابسته به ابعاد؛ در هر resize دوباره ساخته می‌شوند)
+  bakeOverlays(){
+    const w=Math.max(2,this.cssW|0),h=Math.max(2,this.cssH|0);
+    // شب: گرادیان فقط عمودی است پس یک نوارِ باریک کافی است؛ در dark=1 پخته، با globalAlpha ضرب می‌شود
+    {
+      const c=document.createElement('canvas');c.width=4;c.height=256;
+      const g=c.getContext('2d');
+      const gr=g.createLinearGradient(0,0,0,256);
+      gr.addColorStop(0,'rgba(6,10,30,'+(0.62*1.05).toFixed(3)+')');
+      gr.addColorStop(1,'rgba(10,14,36,'+(0.62*0.85).toFixed(3)+')');
+      g.fillStyle=gr;g.fillRect(0,0,4,256);
+      this.ovlNight=c;
+    }
+    // مه: نوارِ عمودی در intensity=1
+    {
+      const c=document.createElement('canvas');c.width=4;c.height=256;
+      const g=c.getContext('2d');
+      const gr=g.createLinearGradient(0,0,0,256);
+      gr.addColorStop(0,'rgba(190,200,215,0.42)');
+      gr.addColorStop(1,'rgba(160,175,195,0.30)');
+      g.fillStyle=gr;g.fillRect(0,0,4,256);
+      this.ovlFog=c;
+    }
+    // ویگنت: کاملاً ثابت — یک‌بار در نصفِ وضوح پخته می‌شود (گرادیانِ نرم، بدون هیچ افتِ دیداری)
+    {
+      const c=document.createElement('canvas');c.width=Math.max(2,(w/2)|0);c.height=Math.max(2,(h/2)|0);
+      const g=c.getContext('2d');g.scale(c.width/w,c.height/h);
+      const vg=g.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.max(w,h)*0.75);
+      vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.30)');
+      g.fillStyle=vg;g.fillRect(0,0,w,h);
+      this.ovlVig=c;
+    }
   },
   dirtyTile(i){
     const cx=((i&255)/CFG.CHUNK)|0,cy=((i>>8)/CFG.CHUNK)|0;
@@ -2218,26 +2291,27 @@ const Renderer = {
     const ar=BROADLEAF_TREE.naturalWidth/BROADLEAF_TREE.naturalHeight;
     const dh=25, dw=dh*ar;
     const sway=Math.sin(Game.time*1.4)*Weather.windSpd*1.5;
+    // گذر ۱: سایه‌ها از اسپرایتِ پیش‌رندرشده (نرم‌سازی روشن، چون سایه گرادیانِ نرم است)
+    const sh=this.sprTreeShadow;
+    if(sh){
+      ctx.imageSmoothingEnabled=true;
+      for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+        const i=y*256+x;
+        if(World.res[i]!==R.WOOD || World.resState[i]<1 || World.temp[i]<0.4) continue;
+        ctx.drawImage(sh,x*16+8-17,y*16+15.5-5,34,10);
+      }
+    }
+    // گذر ۲: تاجِ درخت‌ها (پیکسلی، دقیقاً مثل قبل)
     ctx.imageSmoothingEnabled=false;
+    const snowy=Season.snow>0.25;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
       const i=y*256+x;
       if(World.res[i]!==R.WOOD || World.resState[i]<1 || World.temp[i]<0.4) continue;
       const px=x*16,py=y*16;
-      const sx=px+8, sy=py+15.5;
-      const shadow=ctx.createRadialGradient(sx,sy,0,sx,sy,10);
-      shadow.addColorStop(0,'rgba(0,0,0,0.46)');
-      shadow.addColorStop(0.42,'rgba(0,0,0,0.30)');
-      shadow.addColorStop(0.72,'rgba(0,0,0,0.14)');
-      shadow.addColorStop(0.9,'rgba(0,0,0,0.05)');
-      shadow.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.save();
-      ctx.translate(sx,sy);ctx.scale(1.65,0.46);ctx.translate(-sx,-sy);
-      ctx.fillStyle=shadow;ctx.beginPath();ctx.arc(sx,sy,10,0,Math.PI*2);ctx.fill();
-      ctx.restore();
       const off=sway*(0.5+tileHash(x,y,31)*0.5);
       ctx.drawImage(BROADLEAF_TREE,px+8-dw/2+off,py+15-dh,dw,dh);
       // برفِ زمستانی روی تاج
-      if(Season.snow>0.25&&World.temp[i]<0.72){
+      if(snowy&&World.temp[i]<0.72){
         ctx.globalAlpha=clamp01(Season.snow*0.55);
         ctx.fillStyle='#eef4fb';
         ctx.fillRect(px+8-dw/2+off+dw*0.22,py+15-dh+dh*0.16,dw*0.55,dh*0.10);
@@ -2251,7 +2325,6 @@ const Renderer = {
     const y0=clamp(Math.floor(Tp/16)-2,0,255), y1=clamp(Math.floor(Bt/16)+2,0,255);
     const ar=WILD_BERRY.naturalWidth/WILD_BERRY.naturalHeight;
     const dh=20, dw=dh*ar;
-    ctx.imageSmoothingEnabled=false;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
       const i=y*256+x;
       if(World.res[i]!==R.BERRY || World.resState[i]<1) continue;
@@ -2308,12 +2381,12 @@ const Renderer = {
   /* آب‌وهوا و شب — فضای صفحه */
   renderAtmosphere(ctx,dark,now){
     const w=this.cssW,h=this.cssH,wx=Weather;
-    // مه
+    ctx.imageSmoothingEnabled=true; // برای اورلی‌های گرادیانی؛ پایانِ تابع به false برمی‌گردد
+    // مه (نوارِ پیش‌رندرشده؛ ریاضیِ آلفا دقیقاً یکسان است)
     if(wx.now===WX.FOG&&wx.intensity>0.02){
-      const g=ctx.createLinearGradient(0,0,0,h);
-      g.addColorStop(0,'rgba(190,200,215,'+(0.42*wx.intensity).toFixed(3)+')');
-      g.addColorStop(1,'rgba(160,175,195,'+(0.30*wx.intensity).toFixed(3)+')');
-      ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+      ctx.globalAlpha=wx.intensity;
+      ctx.drawImage(this.ovlFog,0,0,w,h);
+      ctx.globalAlpha=1;
     }
     // ابر و طوفان: تیرگی
     if(wx.now===WX.CLOUD||wx.now===WX.RAIN||wx.now===WX.STORM||wx.now===WX.SNOW){
@@ -2348,22 +2421,19 @@ const Renderer = {
         ctx.fillRect(x,y,s,s);
       }
     }
-    // شب و گرگ‌ومیش
+    // شب و گرگ‌ومیش (نوارِ پیش‌رندرشده؛ ریاضیِ آلفا دقیقاً یکسان است)
     if(dark>0.01){
-      const g=ctx.createLinearGradient(0,0,0,h);
-      const a=dark*0.62;
-      g.addColorStop(0,'rgba(6,10,30,'+(a*1.05).toFixed(3)+')');
-      g.addColorStop(1,'rgba(10,14,36,'+(a*0.85).toFixed(3)+')');
-      ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+      ctx.globalAlpha=dark;
+      ctx.drawImage(this.ovlNight,0,0,w,h);
+      ctx.globalAlpha=1;
     }
     const dusk=Math.max(0,1-Math.abs(Time.phase-0.26)*16)+Math.max(0,1-Math.abs(Time.phase-0.74)*16);
     if(dusk>0.02){ctx.fillStyle='rgba(255,140,60,'+(dusk*0.09).toFixed(3)+')';ctx.fillRect(0,0,w,h);}
     // درخششِ صاعقه
     if(wx.flash>0.02){ctx.fillStyle='rgba(220,235,255,'+(wx.flash*0.35).toFixed(3)+')';ctx.fillRect(0,0,w,h);}
-    // حاشیهٔ تاریک (ویگنت)
-    const vg=ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*0.35,w/2,h/2,Math.max(w,h)*0.75);
-    vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.30)');
-    ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
+    // حاشیهٔ تاریک (ویگنتِ پیش‌رندرشده)
+    ctx.drawImage(this.ovlVig,0,0,w,h);
+    ctx.imageSmoothingEnabled=false;
   },
 
   render(now){
@@ -2445,23 +2515,22 @@ const Renderer = {
       ctx.beginPath();ctx.arc(Input.hoverW.x,Input.hoverW.y,Powers.sel==='meteor'?50:Powers.sel==='bless'?95:34,0,7);ctx.stroke();
       ctx.setLineDash([]);
     }
-    // هالهٔ شبانهٔ روستا
+    // هالهٔ شبانهٔ روستا (اسپرایت‌های پیش‌رندرشده؛ ریاضیِ آلفا دقیقاً یکسان است)
     const dark=Time.darkness;
     if(dark>0.25&&Village.center>=0){
       const vx=TX(Village.center)*16+8,vy=TY(Village.center)*16+8;
-      const gr=ctx.createRadialGradient(vx,vy,4,vx,vy,110);
-      gr.addColorStop(0,'rgba(255,180,90,'+(0.30*dark).toFixed(3)+')');gr.addColorStop(1,'rgba(255,180,90,0)');
-      ctx.globalCompositeOperation='lighter';ctx.fillStyle=gr;
-      ctx.fillRect(vx-110,vy-110,220,220);ctx.globalCompositeOperation='source-over';
-      // نورِ آتش‌سوزی‌ها
       ctx.globalCompositeOperation='lighter';
+      ctx.globalAlpha=dark;
+      ctx.imageSmoothingEnabled=true;
+      ctx.drawImage(this.sprVillageGlow,vx-110,vy-110);
+      // نورِ آتش‌سوزی‌ها
       for(const i of World.fires){
         const x=TX(i)*16+8,y=TY(i)*16+8;
         if(x<L-40||x>Rt+40||y<Tp-40||y>Bt+40)continue;
-        const g2=ctx.createRadialGradient(x,y,2,x,y,44);
-        g2.addColorStop(0,'rgba(255,140,50,'+(0.30*dark).toFixed(3)+')');g2.addColorStop(1,'rgba(255,140,50,0)');
-        ctx.fillStyle=g2;ctx.fillRect(x-44,y-44,88,88);
+        ctx.drawImage(this.sprFireGlow,x-44,y-44);
       }
+      ctx.imageSmoothingEnabled=false;
+      ctx.globalAlpha=1;
       ctx.globalCompositeOperation='source-over';
     }
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -2857,6 +2926,7 @@ const Minimap = {
     this.cv=document.getElementById('mini');
     if(!this.cv)return;
     this.ctx=this.cv.getContext('2d');
+    this.ctx.imageSmoothingEnabled=false;
     this.base=document.createElement('canvas');this.base.width=256;this.base.height=256;
     this.baseCtx=this.base.getContext('2d');
     this.redrawBase();
@@ -2879,7 +2949,6 @@ const Minimap = {
     if(this.dirtyBase){this.dirtyBase=false;this.redrawBase();}
     const c=this.ctx,s=this.cv.width;
     c.clearRect(0,0,s,s);
-    c.imageSmoothingEnabled=false;
     c.drawImage(this.base,0,0,s,s);
     const k=s/W;
     // آتش‌سوزی
@@ -2909,6 +2978,9 @@ const Minimap = {
    ================================================================ */
 const UI = {
   sel:null,lastMin:-1,uiT:0,dbgOn:false,vilOpen:true,tab:'store',el:{},hover:-1,_toastT:null,
+  // کشِ متن‌ها و HTMLها: تا چیزی عوض نشده، DOM دست‌نخورده می‌ماند (بدون هیچ تغییرِ دیداری)
+  _txt:{},_tabH:{},_selH:'',_dbgH:'',_faithW:'',
+  setText(el,key,val){if(this._txt[key]!==val){this._txt[key]=val;el.textContent=val;}},
   init(){
     const $=id=>document.getElementById(id);
     this.el={
@@ -2924,6 +2996,14 @@ const UI = {
     $('selClose').onclick=()=>this.closeSel();
     $('selFollow').onclick=()=>this.followSel();
     $('dbgClose').onclick=()=>this.toggleDbg(false);
+    // کپیِ بذر با delegation (یک‌بار bind می‌شود، نه در هر به‌روزرسانی)
+    this.el.dbgBody.onclick=e=>{
+      const sr=e.target&&e.target.closest?e.target.closest('#seedRow'):null;
+      if(!sr)return;
+      const link=location.href.split('?')[0]+'?seed='+encodeURIComponent(World.seedStr);
+      (navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(
+        ()=>this.toast('پیوندِ جهان کپی شد 🔗'),()=>this.toast('بذر: '+World.seedStr));
+    };
     $('btnDebug').onclick=()=>this.toggleDbg();
     $('btnHelp').onclick=()=>this.toggleHelp();
     $('helpClose').onclick=()=>this.el.help.style.display='none';
@@ -3063,7 +3143,8 @@ const UI = {
       if(World.burn[i]>0)html+=row('آتش','🔥 در حال سوختن');
       if(i===Village.center)html+='<div style="margin-top:6px;color:#ffd77a">مرکزِ روستا</div>';
     }
-    this.el.selTitle.innerHTML=title;this.el.selBody.innerHTML=html;
+    const comb=title+'\n'+html;
+    if(this._selH!==comb){this._selH=comb;this.el.selTitle.innerHTML=title;this.el.selBody.innerHTML=html;}
   },
 
   drawSelection(ctx,z,now){
@@ -3088,10 +3169,14 @@ const UI = {
   refreshTab(force){
     if(!this.vilOpen)return;
     const body=this.el.tabBody;if(!body)return;
-    if(this.tab==='store')body.innerHTML=this.htmlStore();
-    else if(this.tab==='build'){body.innerHTML=this.htmlBuild();this.bindBuild();}
-    else if(this.tab==='people'){body.innerHTML=this.htmlPeople();this.bindPeople();}
-    else if(this.tab==='log'){if(Log.dirty||force){body.innerHTML=this.htmlLog();Log.dirty=false;}}
+    if(this.tab==='store')this._setTab(body,'store',this.htmlStore(),null);
+    else if(this.tab==='build')this._setTab(body,'build',this.htmlBuild(),this.bindBuild);
+    else if(this.tab==='people')this._setTab(body,'people',this.htmlPeople(),this.bindPeople);
+    else if(this.tab==='log'){if(Log.dirty||force){this._setTab(body,'log',this.htmlLog(),null);Log.dirty=false;}}
+  },
+  // فقط وقتی HTML واقعاً عوض شده باشد DOM را می‌نویسد (bind هم فقط همان‌وقت لازم است)
+  _setTab(body,key,h,bind){
+    if(body._k!==key||this._tabH[key]!==h){this._tabH[key]=h;body._k=key;body.innerHTML=h;if(bind)bind.call(this);}
   },
   htmlStore(){
     const st=Village.storage;
@@ -3148,10 +3233,10 @@ const UI = {
       b.onclick=()=>{if(Village.order(b.dataset.b,true)){this.refreshTab(true);Sound.blip(440,0.05);}};
   },
   htmlPeople(){
-    const list=[...Humans.list].sort((a,b)=>a.job-b.job);
-    let h='<div class="lbl">'+faNum(list.length)+' روستایی · گنجایشِ خانه‌ها '+faNum(Village.popCap())+'</div>';
-    for(const p of list){
-      h+='<div class="pRow" data-n="'+Humans.list.indexOf(p)+'">'+
+    const rows=Humans.list.map((p,idx)=>({p,idx})).sort((a,b)=>a.p.job-b.p.job);
+    let h='<div class="lbl">'+faNum(rows.length)+' روستایی · گنجایشِ خانه‌ها '+faNum(Village.popCap())+'</div>';
+    for(const r of rows){const p=r.p;
+      h+='<div class="pRow" data-n="'+r.idx+'">'+
          '<span class="pj">'+(JOB_ICON[p.job]||'🧍')+'</span>'+
          '<span class="pn">'+p.name+'</span>'+
          '<span class="pa">'+faNum(Math.floor(p.age))+'</span>'+
@@ -3191,21 +3276,22 @@ const UI = {
     }
     this.uiT+=dt;
     if(this.uiT<0.3)return;this.uiT=0;
-    this.el.seasonChip.textContent=Season.icon+' '+Season.name;
-    this.el.wxChip.textContent=Weather.icon()+' '+Weather.name();
-    this.el.eraChip.textContent=ERAS[Village.era].icon+' '+ERAS[Village.era].fa;
+    this.setText(this.el.seasonChip,'season',Season.icon+' '+Season.name);
+    this.setText(this.el.wxChip,'wx',Weather.icon()+' '+Weather.name());
+    this.setText(this.el.eraChip,'era',ERAS[Village.era].icon+' '+ERAS[Village.era].fa);
     const fm=Powers.faithMax();
-    this.el.faithFill.style.width=((Powers.faith/fm)*100).toFixed(0)+'%';
-    this.el.faithTxt.textContent=faNum(Powers.faith|0);
-    this.el.popChip.textContent='👥 '+faNum(Humans.list.length)+(Humans.modern.length?' +'+faNum(Humans.modern.length):'');
-    this.el.vilPop.textContent='· '+faNum(Humans.list.length)+' نفر';
+    const fw=((Powers.faith/fm)*100).toFixed(0)+'%';
+    if(this._faithW!==fw){this._faithW=fw;this.el.faithFill.style.width=fw;}
+    this.setText(this.el.faithTxt,'faith',faNum(Powers.faith|0));
+    this.setText(this.el.popChip,'pop','👥 '+faNum(Humans.list.length)+(Humans.modern.length?' +'+faNum(Humans.modern.length):''));
+    this.setText(this.el.vilPop,'vilpop','· '+faNum(Humans.list.length)+' نفر');
     this.syncPowers();
     this.refreshTab();
     if(this.sel)this.refreshSel();
     if(this.dbgOn){
       const row=this.row;
       const cnt=Entities.counts();
-      this.el.dbgBody.innerHTML=
+      const dh=
         row('FPS',faNum(Game.fps|0))+row('DT',(Game.lastDt*1000).toFixed(1)+'ms')+
         row('Zoom',Camera.zoom.toFixed(2))+row('Camera',(Camera.x|0)+','+(Camera.y|0))+
         '<div class="row" id="seedRow"><span>Seed</span><b>'+World.seedStr+'</b></div>'+
@@ -3215,10 +3301,7 @@ const UI = {
         row('چانک',faNum(Renderer.cache.size)+'/'+faNum(Renderer.dirtyList.length))+
         row('🦌/🐇/🐗/🐺/🐟',faNum(cnt.deer)+'/'+faNum(cnt.rabbit)+'/'+faNum(cnt.boar)+'/'+faNum(cnt.wolf)+'/'+faNum(cnt.fish))+
         row('سرعت','×'+faNum(Game.speed));
-      const sr=document.getElementById('seedRow');
-      if(sr)sr.onclick=()=>{const link=location.href.split('?')[0]+'?seed='+encodeURIComponent(World.seedStr);
-        (navigator.clipboard?navigator.clipboard.writeText(link):Promise.reject()).then(
-          ()=>this.toast('پیوندِ جهان کپی شد 🔗'),()=>this.toast('بذر: '+World.seedStr));};
+      if(this._dbgH!==dh){this._dbgH=dh;this.el.dbgBody.innerHTML=dh;}
     }
   }
 };
@@ -3418,7 +3501,9 @@ const Game = {
     Log.add('🌍 جهان آفریده شد — بذر: '+World.seedStr,'sys');
     Log.add('🏘️ روستا بنیاد نهاده شد','sys');
     if(Save.has())UI.toast('یک جهانِ ذخیره‌شده داری — 📂 برای بازیابی');
-    setTimeout(()=>{document.getElementById('splash').classList.add('gone');Game.ready=true;},700);
+    setTimeout(()=>{const sp=document.getElementById('splash');sp.classList.add('gone');Game.ready=true;
+      // پس از محو شدن، اسپلش و انیمیشنِ ۷۰ ستاره کاملاً از رندر خارج می‌شوند
+      setTimeout(()=>{sp.style.display='none';const st=document.getElementById('stars');if(st)st.innerHTML='';},900);},700);
     Game.last=performance.now();
     requestAnimationFrame(t=>Game.loop(t));
   },
@@ -3452,5 +3537,5 @@ const Game = {
 Game.start();
 
 </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a36f47142849e182',t:'MTc4ODcxNjYyNA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<!-- cleaned: injected third-party challenge script removed --></body>
 </html>
