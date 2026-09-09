@@ -266,7 +266,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
     <h4>خدایگی</h4>
     <ul>
       <li>ایمان (🙏) با نیایشگاه و شادیِ مردم زیاد می‌شود و خرجِ قدرت‌ها می‌شود.</li>
-      <li>باران، آفتاب، صاعقه، رویشِ جنگل، چشمه، برکت، شهاب‌سنگ، احضارِ جانور.</li>
+      <li>باران، آفتاب، صاعقه، رویشِ جنگل، چشمه، برکت، شهاب‌سنگ، احضارِ جانور و آفرینشِ انسان.</li>
       <li>ذخیره/بازیابی در همین مرورگر · بازتولید همان جهان با <span dir="ltr">?seed=SEED</span></li>
     </ul>
     <div style="text-align:center;margin-top:12px"><button id="helpClose" class="panel" style="padding:6px 22px;border-radius:99px">بستن</button></div>
@@ -1436,11 +1436,20 @@ const Humans = {
   jobT:0, birthT:0,
   alive(){return this.list;},
   adults(){return this.list.filter(h=>h.age>=14);},
-  spawn(age){
-    const h=Village.houses[(Math.random()*Village.houses.length)|0]||Village.center;
+  spawn(age,x,y){
+    let h,px,py;
+    if(x!==undefined){ // احضارِ الهی: در نقطهٔ انتخاب‌شده — اگر خشکیِ قابلِ زندگی باشد
+      const ti=clamp((((y/16)|0)<<8)+((x/16)|0),0,N-1);
+      const b=World.biome[ti];
+      if(b<=B.RIVER||b===B.MOUNTAIN||b===B.SNOW){UI.toast('اینجا جای زندگی نیست 🌍');return null;}
+      h=ti;px=x;py=y;
+    }else{
+      h=Village.houses[(Math.random()*Village.houses.length)|0]||Village.center;
+      px=TX(h)*16+8;py=TY(h)*16+20;
+    }
     const male=Math.random()<0.5;
     const v={
-      x:TX(h)*16+8,y:TY(h)*16+20,home:h,vx:0,vy:0,
+      x:px,y:py,home:h,vx:0,vy:0,
       state:H.IDLE,res:R.NONE,node:-1,path:null,pathI:0,workT:0,carry:0,ctype:0,
       hunger:Math.random()*0.3,energy:0.8+Math.random()*0.2,health:1,happy:0.7,
       name:(male?pick(this.NAMES_M):pick(this.NAMES_F)),gender:male?'م':'ز',
@@ -1853,6 +1862,7 @@ const Powers = {
     {id:'meteor',  icon:'☄️', fa:'شهاب‌سنگ',     cost:40, click:true,  desc:'ویرانی از آسمان'},
     {id:'deer',    icon:'🦌', fa:'احضارِ آهو',   cost:8,  click:true,  desc:'گله‌ای آهو پدید می‌آید'},
     {id:'wolf',    icon:'🐺', fa:'احضارِ گرگ',   cost:12, click:true,  desc:'گرگی گرسنه رها می‌شود'},
+    {id:'human',   icon:'🧑', fa:'آفرینشِ انسان', cost:15, click:true,  desc:'انسانی تازه پا به جهان می‌گذارد'},
       ],
   faithMax(){return CFG.FAITH_MAX+Village.count('temple')*40+Village.count('academy')*30;},
   update(dt){
@@ -1932,6 +1942,10 @@ const Powers = {
         const e=Entities.spawn('wolf',wx,wy,2);
         if(!e||!Entities.passable(wx,wy,false)){if(e)Entities.kill(e);UI.toast('اینجا جای گرگ نیست 🐺');ok=false;break;}
         Renderer.addPulse(wx,wy);Log.add('🐺 گرگی رها شد','power');break;}
+      case 'human':{
+        const v=Humans.spawn(undefined,wx,wy);
+        if(!v){ok=false;break;}
+        Renderer.addPulse(wx,wy);Log.add('🧑 '+v.name+' به جهان آورده شد','power');break;}
       default: ok=false;
     }
     if(ok){this.faith-=p.cost;Sound.blip(660,0.06);}
