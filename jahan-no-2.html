@@ -266,7 +266,7 @@ canvas#game{position:absolute;inset:0;width:100%;height:100%;display:block;touch
     <h4>خدایگی</h4>
     <ul>
       <li>ایمان (🙏) با نیایشگاه و شادیِ مردم زیاد می‌شود و خرجِ قدرت‌ها می‌شود.</li>
-      <li>باران، آفتاب، صاعقه، رویشِ جنگل، چشمه، برکت، شهاب‌سنگ، احضارِ جانور و انسانِ مدرن.</li>
+      <li>باران، آفتاب، صاعقه، رویشِ جنگل، چشمه، برکت، شهاب‌سنگ، احضارِ جانور.</li>
       <li>ذخیره/بازیابی در همین مرورگر · بازتولید همان جهان با <span dir="ltr">?seed=SEED</span></li>
     </ul>
     <div style="text-align:center;margin-top:12px"><button id="helpClose" class="panel" style="padding:6px 22px;border-radius:99px">بستن</button></div>
@@ -1424,47 +1424,12 @@ const Entities = {
 };
 
 /* ================================================================
-   MODERN HUMAN — تکسچرِ پیکسلی
-   ================================================================ */
-const ModernHumanTexture = {
-  cv:null,ctx:null,ready:false,
-  init(){
-    this.cv=document.createElement('canvas');this.cv.width=32;this.cv.height=44;
-    this.ctx=this.cv.getContext('2d');this.ctx.imageSmoothingEnabled=true;
-    this.ready=true;
-  },
-  draw(ctx,x,y,scale,phase,facing,walk,style=0){
-    if(!this.ready)this.init();
-    const c=this.ctx;c.clearRect(0,0,32,44);
-    const swing=Math.sin(phase)*walk;
-    c.fillStyle='rgba(0,0,0,.22)';c.beginPath();c.ellipse(16,40,9,3,0,0,Math.PI*2);c.fill();
-    c.save();c.translate(16,0);
-    const pants=['#253044','#314a3b','#3b3a4f','#4a4035'][style%4];
-    c.fillStyle=pants;c.fillRect(-6+swing*0.35,29,5,10);c.fillRect(1-swing*0.35,29,5,10);
-    c.fillStyle='#111827';c.fillRect(-7+swing*0.35,38,6,3);c.fillRect(1-swing*0.35,38,6,3);
-    c.fillStyle='#e7edf4';c.fillRect(-7,16,14,14);
-    const shirt=['#4b647f','#5d6f4d','#6d566e','#80644c'][style%4];
-    c.fillStyle=shirt;c.fillRect(-6,17,12,12);
-    c.fillStyle='#f4f6f8';c.fillRect(-1,17,2,11);
-    c.save();c.translate(-7,18);c.rotate(-swing*.045);c.fillStyle=shirt;c.fillRect(-3,0,4,13);c.fillStyle='#d9a27c';c.fillRect(-3,12,4,3);c.restore();
-    c.save();c.translate(7,18);c.rotate(swing*.045);c.fillStyle=shirt;c.fillRect(-1,0,4,13);c.fillStyle='#d9a27c';c.fillRect(-1,12,4,3);c.restore();
-    c.fillStyle='#d9a27c';c.fillRect(-3,12,6,5);
-    c.fillStyle='#e4b08b';c.beginPath();c.arc(0,8,6.5,0,Math.PI*2);c.fill();
-    c.fillStyle='#35291f';c.beginPath();c.arc(0,5.5,6.7,Math.PI,Math.PI*2);c.fill();c.fillRect(-6,5,12,3);
-    const fx=facing>=0?1:-1;c.fillStyle='#1b2330';c.fillRect(fx*3-1,7,1.5,1.5);c.fillRect(fx*3-1,10,1,1);
-    c.restore();
-    ctx.save();ctx.translate(x,y-22*scale);ctx.scale(scale,scale);
-    ctx.drawImage(this.cv,-16,-22,32,44);ctx.restore();
-  }
-};
-
-/* ================================================================
    HUMANS — روستاییان با شغل، مهارت، سن، سلامت و خانواده
    ================================================================ */
 const JOBCOL=['#77694f','#8a5a3a','#6d7683','#3f6f8f','#4f7a4a','#b39a4e','#a3673c','#7a5f8f','#b0a3d6','#c98fa0'];
 const CARRYCOL=['','#7aa04e','#9a99a0','#a56a4a','#4fae8f','#e8c352','#d84a52','#7fb2cf','#8f8f6a','#c9705f','#d9c06a','#9fb6c4','#b9c7d6'];
 const Humans = {
-  list:[],modern:[],
+  list:[],
   NAMES_M:['آرش','گیو','کیان','آبان','رامین','بهرام','فرهاد','سهراب','اردشیر','پویا','کاوه','بیژن'],
   NAMES_F:['باران','آذر','مهرا','ستاره','نیلا','پریسا','شیرین','ترانه','گلاره','آناهیتا','رها','دریا'],
   NEED:[0,80,55,30,22,12,0,50,0,40,45,10,8],
@@ -1839,7 +1804,6 @@ const Humans = {
     // بازتخصیصِ شغل‌ها
     this.jobT+=dt;
     if(this.jobT>12){this.jobT=0;this.assignJobs();}
-    this.updateModern(dt);
   },
   releaseWork(h){
     if(h.bldTarget&&h.bldTarget.worker===h)h.bldTarget.worker=null;
@@ -1851,123 +1815,6 @@ const Humans = {
     return b>B.RIVER&&b!==B.MOUNTAIN&&!(World.flags[i]&FLAG_BLD);
   },
 
-  /* ---------- انسان‌های مدرن (ناظرانِ مستقل) ---------- */
-  spawnModern(x,y){
-    const i=clamp((((y/16)|0)<<8)+((x/16)|0),0,N-1);
-    const b=World.biome[i];
-    if(b<=B.RIVER||b===B.MOUNTAIN||b===B.SNOW){UI.toast('اینجا جای مناسبی برای انسان نیست 🌍');return false;}
-    const id=this.modern.length+1;
-    this.modern.push({x,y,homeX:x,homeY:y,vx:0,vy:0,targetX:x,targetY:y,
-      speed:18+Math.random()*8,wanderR:115+Math.random()*55,decT:.2+Math.random()*1.2,
-      idleT:.3+Math.random()*1.4,phase:Math.random()*Math.PI*2,walk:0,
-      name:'انسان مدرن '+faNum(id),socialT:0,behavior:'wander',
-      hunger:.05+Math.random()*.25,energy:.65+Math.random()*.35,mood:.55+Math.random()*.45,
-      socialNeed:.15+Math.random()*.55,thinkT:.2+Math.random()*.8,stuckT:0,
-      style:(Math.random()*4)|0,speechT:0,speech:'',lastX:x,lastY:y});
-    Renderer.addPulse(x,y);UI.toast('انسان مدرن '+faNum(id)+' اسپاون شد 🧑');
-    Log.add('🧑 '+ 'انسان مدرن '+faNum(id)+' پا به جهان گذاشت','life');
-    return true;
-  },
-  modernPassable(x,y){
-    if(x<10||y<10||x>W-10||y>W-10)return false;
-    const tx=clamp((x/16)|0,0,255),ty=clamp((y/16)|0,0,255);
-    const i=ty*256+tx,b=World.biome[i];
-    return b>B.RIVER&&b!==B.MOUNTAIN&&b!==B.SNOW;
-  },
-  updateModern(dt){
-    for(const h of this.modern){
-      h.decT-=dt; h.idleT=Math.max(0,h.idleT-dt); h.socialT=Math.max(0,h.socialT-dt);
-      h.thinkT-=dt; h.speechT=Math.max(0,h.speechT-dt);
-      const moving=Math.hypot(h.vx,h.vy)>2;
-      h.hunger=clamp01(h.hunger+dt*(moving?.004:.002));
-      h.energy=clamp01(h.energy-dt*(moving?.003:.0008));
-      h.socialNeed=clamp01(h.socialNeed+dt*(.006+(h.mood<.35?.004:0)));
-      h.mood=clamp01(.72+h.energy*.18-h.hunger*.38-h.socialNeed*.18);
-
-      let near=null,nearD=1e9,groupX=0,groupY=0,groupN=0;
-      for(const o of this.modern){
-        if(o===h)continue;
-        const dx=o.x-h.x,dy=o.y-h.y,d=Math.hypot(dx,dy);
-        if(d<190){groupX+=o.x;groupY+=o.y;groupN++;if(d<nearD){nearD=d;near=o;}}
-      }
-      const td=Math.hypot(h.targetX-h.x,h.targetY-h.y);
-      if(td<7){h.targetX=h.x;h.targetY=h.y;h.vx*=Math.max(0,1-dt*7);h.vy*=Math.max(0,1-dt*7);
-        if(h.idleT<=0)h.decT=0;}
-      if(h.thinkT<=0 && h.idleT<=0){
-        h.thinkT=.35+Math.random()*.8;
-        const homeD=Math.hypot(h.x-h.homeX,h.y-h.homeY);
-        const tired=h.energy<.18, hungry=h.hunger>.82, social=h.socialNeed>.72;
-        let foodTarget=null, foodD=1e9;
-        if(hungry || h.hunger>.58){
-          const cx=clamp((h.x/16)|0,0,255), cy=clamp((h.y/16)|0,0,255), maxR=11;
-          for(let yy=Math.max(0,cy-maxR);yy<=Math.min(255,cy+maxR);yy++)for(let xx=Math.max(0,cx-maxR);xx<=Math.min(255,cx+maxR);xx++){
-            const ii=yy*256+xx;
-            if(World.res[ii]===R.BERRY && World.resState[ii]>=.75){
-              const dd=Math.hypot(xx*16+8-h.x,yy*16+8-h.y);
-              if(dd<foodD){foodD=dd;foodTarget={x:xx*16+8,y:yy*16+8,i:ii};}
-            }
-          }
-        }
-        if(foodTarget && foodD<190){h.targetX=foodTarget.x;h.targetY=foodTarget.y;h.behavior='forage';h.socialT=0;}
-        else if(tired && homeD>28){h.targetX=h.homeX;h.targetY=h.homeY;h.behavior='rest-return';h.socialT=0;}
-        else if(near && (social || nearD>88)){
-          const nd=Math.max(nearD,1),gap=62+Math.random()*18;
-          h.targetX=near.x-(near.x-h.x)/nd*gap; h.targetY=near.y-(near.y-h.y)/nd*gap;
-          h.socialT=2+Math.random()*3; h.behavior='social';
-        }else if(near && nearD<40){
-          const a=Math.atan2(h.y-near.y,h.x-near.x)+(Math.random()-.5)*.8;
-          h.targetX=h.x+Math.cos(a)*(28+Math.random()*20); h.targetY=h.y+Math.sin(a)*(28+Math.random()*20);
-          h.behavior='separate';
-        }else if(Math.random()<.12 && !tired){
-          h.targetX=h.x;h.targetY=h.y;h.idleT=.5+Math.random()*1.3;h.behavior='observe';
-        }else{
-          let a=Math.random()*Math.PI*2,r=35+Math.random()*h.wanderR;
-          if(groupN && Math.random()<.28){
-            const ga=Math.atan2(groupY/groupN-h.y,groupX/groupN-h.x); a=ga+(Math.random()-.5)*1.8; r=25+Math.random()*100;
-          }
-          h.targetX=clamp(h.homeX+Math.cos(a)*r,12,W-12); h.targetY=clamp(h.homeY+Math.sin(a)*r,12,W-12);
-          h.behavior='wander';
-        }
-        if(!this.modernPassable(h.targetX,h.targetY)){
-          h.targetX=h.x;h.targetY=h.y;h.idleT=.25+Math.random()*.6;h.behavior='blocked';
-        }
-      }
-      const tx=h.targetX-h.x,ty=h.targetY-h.y,td2=Math.hypot(tx,ty);
-      let ax=td2>6?tx/td2:0, ay=td2>6?ty/td2:0;
-      const hx=h.homeX-h.x,hy=h.homeY-h.y,hd=Math.hypot(hx,hy);
-      if(hd>h.wanderR*.78){const f=Math.min(4.5,(hd/h.wanderR-.7)*5); ax+=hx/Math.max(hd,1)*f; ay+=hy/Math.max(hd,1)*f;}
-      if(groupN && nearD>95){ax+=(groupX/groupN-h.x)*.004;ay+=(groupY/groupN-h.y)*.004;}
-      for(const o of this.modern){
-        if(o===h)continue; const rx=h.x-o.x,ry=h.y-o.y,rd=Math.hypot(rx,ry);
-        if(rd<34&&rd>0){const f=(34-rd)/34*2.8;ax+=rx/rd*f;ay+=ry/rd*f;}
-      }
-      const al=Math.hypot(ax,ay)||1;ax/=al;ay/=al;
-      const standing=h.idleT>0 || td2<=6;
-      const desired=standing?0:h.speed*(h.socialT>0?.76:(h.energy<.3?.62:1));
-      const k=Math.min(1,dt*(standing?8:3.1));
-      h.vx+=(ax*desired-h.vx)*k; h.vy+=(ay*desired-h.vy)*k;
-      if(standing){h.vx*=Math.max(0,1-dt*9);h.vy*=Math.max(0,1-dt*9);}
-      const nx=h.x+h.vx*dt,ny=h.y+h.vy*dt;
-      if(this.modernPassable(nx,ny)){h.x=nx;h.y=ny;}
-      else{h.vx*=-.25;h.vy*=-.25;h.targetX=h.x;h.targetY=h.y;h.thinkT=.1;}
-      const moved=Math.hypot(h.x-h.lastX,h.y-h.lastY); h.lastX=h.x;h.lastY=h.y;
-      if(!standing && moved<.15)h.stuckT+=dt;else h.stuckT=Math.max(0,h.stuckT-dt*2);
-      if(h.stuckT>1.2){const a=Math.random()*Math.PI*2;h.targetX=clamp(h.x+Math.cos(a)*45,12,W-12);h.targetY=clamp(h.y+Math.sin(a)*45,12,W-12);h.stuckT=0;}
-      if(near&&nearD<58&&h.socialNeed>.55&&h.speechT<=0&&Math.random()<dt*.8){
-        h.socialNeed=Math.max(0,h.socialNeed-.35);h.speechT=2.2;h.speech=Math.random()<.5?'سلام':'خوبی؟';
-        h.mood=clamp01(h.mood+.12);
-      }
-      if(h.behavior==='forage'){
-        const ti=clamp((((h.y/16)|0)<<8)+((h.x/16)|0),0,N-1);
-        if(World.res[ti]===R.BERRY && World.resState[ti]>=.55 && Math.hypot(h.x-TX(ti)*16-8,h.y-TY(ti)*16-8)<13){
-          h.hunger=Math.max(0,h.hunger-.38); h.energy=Math.min(1,h.energy+.08);
-          h.idleT=Math.max(h.idleT,.7+Math.random()*1.1); h.behavior='eating';
-          World.resState[ti]=Math.max(0,World.resState[ti]-.08);
-        }
-      }
-      const actual=Math.hypot(h.vx,h.vy); h.phase+=dt*(actual>.8?5.2:.8); h.walk=Math.min(1,actual/Math.max(h.speed,1));
-    }
-  },
   /* رسمِ تک‌انسان — از لایهٔ عمق‌دار (renderTallSorted) هم صدا زده می‌شود */
   drawOne(ctx,h,z){
     if(z<0.5){ctx.fillStyle='#f2d5b0';ctx.fillRect(h.x-1,h.y-1,2,2);return;}
@@ -2006,8 +1853,7 @@ const Powers = {
     {id:'meteor',  icon:'☄️', fa:'شهاب‌سنگ',     cost:40, click:true,  desc:'ویرانی از آسمان'},
     {id:'deer',    icon:'🦌', fa:'احضارِ آهو',   cost:8,  click:true,  desc:'گله‌ای آهو پدید می‌آید'},
     {id:'wolf',    icon:'🐺', fa:'احضارِ گرگ',   cost:12, click:true,  desc:'گرگی گرسنه رها می‌شود'},
-    {id:'human',   icon:'🧑', fa:'انسانِ مدرن',  cost:15, click:true,  desc:'ناظری مستقل با AI خودش'},
-  ],
+      ],
   faithMax(){return CFG.FAITH_MAX+Village.count('temple')*40+Village.count('academy')*30;},
   update(dt){
     let happy=0;for(const h of Humans.list)happy+=h.happy;
@@ -2086,7 +1932,6 @@ const Powers = {
         const e=Entities.spawn('wolf',wx,wy,2);
         if(!e||!Entities.passable(wx,wy,false)){if(e)Entities.kill(e);UI.toast('اینجا جای گرگ نیست 🐺');ok=false;break;}
         Renderer.addPulse(wx,wy);Log.add('🐺 گرگی رها شد','power');break;}
-      case 'human': ok=Humans.spawnModern(wx,wy);break;
       default: ok=false;
     }
     if(ok){this.faith-=p.cost;Sound.blip(660,0.06);}
@@ -2106,7 +1951,7 @@ const Renderer = {
   // اسپرایت‌ها و اورلی‌های پیش‌رندرشده (خروجیِ پیکسلی یکسان، هزینهٔ هر فریم صفر)
   sprTreeShadow:null,sprFireGlow:null,sprVillageGlow:null,
   sprBerry:null,
-  _ents:[],_pool:[],_trees:[],_bubs:[],
+  _ents:[],_pool:[],_trees:[],
   ovlNight:null,ovlFog:null,ovlVig:null,
 
   init(){
@@ -2315,8 +2160,6 @@ const Renderer = {
       n++;o.y=y;o.k=k;o.e=e;ents.push(o);};
     if(z>=0.34)for(const h of Humans.list){
       if(h.x<L-20||h.x>Rt+20||h.y<Tp-20||h.y>Bt+20)continue;add(h.y,0,h);}
-    if(z>=0.45)for(const h of Humans.modern){
-      if(h.x<L-30||h.x>Rt+30||h.y<Tp-40||h.y>Bt+30)continue;add(h.y,1,h);}
     if(z>=0.4)for(const e of Entities.list){
       if(e.x<L-20||e.x>Rt+20||e.y<Tp-20||e.y>Bt+20)continue;add(e.y+4,2,e);}
     for(const b of Village.buildings){
@@ -2330,7 +2173,7 @@ const Renderer = {
       const wx=TX(Village.center)*16,wy=TY(Village.center)*16;
       if(wx>=L-24&&wx<Rt+8&&wy>=Tp-24&&wy<Bt+8)add(wy+16,5,Village.center);}
     ents.sort(_YSORT);
-    const trees=this._trees,bubs=this._bubs;bubs.length=0;
+    const trees=this._trees;
     const hasImg=BROADLEAF_TREE.complete&&BROADLEAF_TREE.naturalWidth;
     const dh=18.75,dw=hasImg?dh*(BROADLEAF_TREE.naturalWidth/BROADLEAF_TREE.naturalHeight):0;
     const sway=Math.sin(Game.time*1.4)*Weather.windSpd*1.5;
@@ -2340,21 +2183,11 @@ const Renderer = {
     if(showJob){ctx.save();ctx.font='4px sans-serif';ctx.textAlign='center';}
     let a=0,b=0;const nT=trees.length,nE=ents.length;
     while(a<nT){
-      if(b<nE&&ents[b].y<((trees[a]>>8)*16+15))this._drawTallEnt(ctx,ents[b++],z,now,bubs);
+      if(b<nE&&ents[b].y<((trees[a]>>8)*16+15))this._drawTallEnt(ctx,ents[b++],z,now);
       else this._drawTreeTile(ctx,trees[a++],dw,sway,snowy);
     }
-    while(b<nE)this._drawTallEnt(ctx,ents[b++],z,now,bubs);
+    while(b<nE)this._drawTallEnt(ctx,ents[b++],z,now);
     if(showJob)ctx.restore();
-    // حباب‌های گفتار روی همهٔ اجسام (تا تاجِ درخت رویشان نیفتد)
-    if(bubs.length){
-      ctx.save();ctx.font='10px sans-serif';ctx.textAlign='center';
-      for(const h of bubs){
-        const tx=h.x,ty=h.y-16,tw=ctx.measureText(h.speech).width+8;
-        ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(tx-tw/2,ty-10,tw,13);
-        ctx.fillStyle='#26313b';ctx.fillText(h.speech,tx,ty);
-      }
-      ctx.restore();
-    }
   },
   _drawTreeTile(ctx,i,dw,sway,snowy){
     const tx=i&255,ty=i>>8,px=tx*16,py=ty*16,temp=World.temp[i];
@@ -2371,14 +2204,10 @@ const Renderer = {
       ctx.globalAlpha=1;
     }
   },
-  _drawTallEnt(ctx,o,z,now,bubs){
+  _drawTallEnt(ctx,o,z,now){
     const e=o.e;
     switch(o.k){
       case 0:Humans.drawOne(ctx,e,z);break;
-      case 1:
-        ModernHumanTexture.draw(ctx,e.x,e.y,0.24,e.phase,e.vx<-.2?-1:1,e.walk,e.style);
-        if(e.speechT>0&&z>.7)bubs.push(e);
-        break;
       case 2:Entities.drawOne(ctx,e,z,now);break;
       case 3:drawBuilding(ctx,e.type,TX(e.i)*16,TY(e.i)*16,tileHash(TX(e.i),TY(e.i),(World.seed>>>3)&255),1);break;
       case 4:{const x=TX(e.i)*16,y=TY(e.i)*16;
@@ -2960,7 +2789,6 @@ const Input = {
       return;
     }
     let best=null,bd=12/Camera.zoom+6;
-    for(const h of Humans.modern){const d=Math.hypot(h.x-w.x,h.y-w.y);if(d<bd){bd=d;best={kind:'modern',ref:h};}}
     for(const h of Humans.list){const d=Math.hypot(h.x-w.x,h.y-w.y);if(d<bd){bd=d;best={kind:'human',ref:h};}}
     for(const e of Entities.list){const d=Math.hypot(e.x-w.x,e.y-w.y);if(d<bd){bd=d;best={kind:'animal',ref:e};}}
     if(best)UI.select(best);
@@ -3020,8 +2848,6 @@ const Minimap = {
     }
     c.fillStyle='#ffffff';
     for(const h of Humans.list)c.fillRect(h.x*k,h.y*k,1.5,1.5);
-    c.fillStyle='#7fd4ff';
-    for(const h of Humans.modern)c.fillRect(h.x*k,h.y*k,1.5,1.5);
     c.fillStyle='#ff5a5a';
     for(const e of Entities.list)if(e.type==='wolf')c.fillRect(e.x*k,e.y*k,1.5,1.5);
     // کادرِ دید
@@ -3155,19 +2981,6 @@ const UI = {
       html+='سیری'+bar(1-h.hunger,'#ffd77a');
       html+='شادی'+bar(h.happy,'#7fb4ff');
       html+=row('برداشتِ کل',faNum(h.gathered)+(h.kills?' · شکار: '+faNum(h.kills):''));
-    }else if(s.kind==='modern'){
-      const h=s.ref;
-      if(Humans.modern.indexOf(h)<0){this.closeSel();return;}
-      title='🧑 '+h.name;
-      const beh={wander:'گشت‌وگذار',social:'اجتماعی',forage:'جست‌وجوی غذا',eating:'در حال خوردن',
-        'rest-return':'بازگشت برای استراحت',separate:'فاصله‌گیری',observe:'مشاهده',blocked:'تغییر مسیر'};
-      html+=row('هوش مصنوعی','<span class="tagChip">نیاز + گروه + تعامل</span>');
-      html+=row('رفتار',beh[h.behavior]||h.behavior);
-      html+='انرژی'+bar(h.energy,'#7ed49a');
-      html+='سیری'+bar(1-h.hunger,'#ffd77a');
-      html+='حال‌وهوا'+bar(h.mood,'#7fb4ff');
-      html+='نیاز اجتماعی'+bar(h.socialNeed,'#c9a0ff');
-      html+=row('سرعت',faNum(Math.round(Math.hypot(h.vx,h.vy)))+' px/s');
     }else if(s.kind==='animal'){
       const e=s.ref;
       if(Entities.list.indexOf(e)<0){this.closeSel();return;}
@@ -3302,19 +3115,14 @@ const UI = {
          '<span class="pb"><i style="width:'+(((1-p.hunger)*100)|0)+'%;background:#ffd77a"></i></span>'+
          '</div>';
     }
-    if(Humans.modern.length){
-      h+='<div class="lbl">انسان‌های مدرن</div>';
-      for(const p of Humans.modern)
-        h+='<div class="pRow" data-m="'+Humans.modern.indexOf(p)+'"><span class="pj">🧑</span><span class="pn">'+p.name+'</span></div>';
-    }
     return h;
   },
   bindPeople(){
     for(const r of this.el.tabBody.querySelectorAll('.pRow'))
       r.onclick=()=>{
-        const h=r.dataset.n!==undefined?Humans.list[+r.dataset.n]:Humans.modern[+r.dataset.m];
+        const h=Humans.list[+r.dataset.n];
         if(!h)return;
-        this.select({kind:r.dataset.n!==undefined?'human':'modern',ref:h});
+        this.select({kind:'human',ref:h});
         Camera.focus(h.x,h.y,Math.max(Camera.tz,2));
       };
   },
@@ -3341,7 +3149,7 @@ const UI = {
     const fw=((Powers.faith/fm)*100).toFixed(0)+'%';
     if(this._faithW!==fw){this._faithW=fw;this.el.faithFill.style.width=fw;}
     this.setText(this.el.faithTxt,'faith',faNum(Powers.faith|0));
-    this.setText(this.el.popChip,'pop','👥 '+faNum(Humans.list.length)+(Humans.modern.length?' +'+faNum(Humans.modern.length):''));
+    this.setText(this.el.popChip,'pop','👥 '+faNum(Humans.list.length));
     this.setText(this.el.vilPop,'vilpop','· '+faNum(Humans.list.length)+' نفر');
     this.syncPowers();
     this.refreshTab();
@@ -3354,7 +3162,7 @@ const UI = {
         row('Zoom',Camera.zoom.toFixed(2))+row('Camera',(Camera.x|0)+','+(Camera.y|0))+
         '<div class="row" id="seedRow"><span>Seed</span><b>'+World.seedStr+'</b></div>'+
         row('Tile',this.hover>=0?'('+faNum(this.hover&255)+','+faNum(this.hover>>8)+')':'—')+
-        row('موجودات',faNum(Entities.list.length+Humans.list.length+Humans.modern.length))+
+        row('موجودات',faNum(Entities.list.length+Humans.list.length))+
         row('آتش',faNum(World.fires.length))+
         row('چانک',faNum(Renderer.cache.size)+'/'+faNum(Renderer.dirtyList.length))+
         row('🦌/🐇/🐗/🐺/🐟',faNum(cnt.deer)+'/'+faNum(cnt.rabbit)+'/'+faNum(cnt.boar)+'/'+faNum(cnt.wolf)+'/'+faNum(cnt.fish))+
@@ -3397,7 +3205,6 @@ const Save = {
         faith:Powers.faith,
         humans:Humans.list.map(h=>({x:h.x,y:h.y,n:h.name,g:h.gender,a:h.age,j:h.job,s:h.skill,
           hu:h.hunger,en:h.energy,he:h.health,hp:h.happy,home:h.home,ga:h.gathered,ki:h.kills})),
-        modern:Humans.modern.map(h=>({x:h.x,y:h.y,hx:h.homeX,hy:h.homeY,n:h.name,st:h.style})),
         ents:Entities.list.map(e=>({t:e.type,x:e.x,y:e.y,a:e.age,h:e.health,hu:e.hunger})),
         log:Log.items.slice(-40),
       };
@@ -3443,10 +3250,6 @@ const Save = {
         path:null,pathI:0,workT:0,carry:0,ctype:0,hunger:h.hu,energy:h.en,health:h.he,happy:h.hp,
         name:h.n,gender:h.g,age:h.a,job:h.j,skill:h.s,decT:Math.random()*0.4,wantEat:false,idleT:0,
         flee:0,hurt:0,bldTarget:null,dead:false,sleepOnArrive:false,kills:h.ki||0,gathered:h.ga||0}));
-      Humans.modern=d.modern.map(h=>({x:h.x,y:h.y,homeX:h.hx,homeY:h.hy,vx:0,vy:0,targetX:h.x,targetY:h.y,
-        speed:18+Math.random()*8,wanderR:115+Math.random()*55,decT:0.4,idleT:0.5,phase:Math.random()*7,walk:0,
-        name:h.n,socialT:0,behavior:'wander',hunger:0.2,energy:0.8,mood:0.7,socialNeed:0.3,thinkT:0.4,
-        stuckT:0,style:h.st,speechT:0,speech:'',lastX:h.x,lastY:h.y}));
       Entities.list=[];
       for(const e of d.ents){const o=Entities.spawn(e.t,e.x,e.y,e.a);if(o){o.health=e.h;o.hunger=e.hu;}}
       Log.items=d.log||[];Log.dirty=true;
